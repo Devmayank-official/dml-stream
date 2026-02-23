@@ -11,8 +11,8 @@
 [![CI/CD](https://img.shields.io/github/actions/workflow/status/devmayank-official/dml-stream/ci-cd.yml?style=for-the-badge&logo=github-actions)](https://github.com/devmayank-official/dml-stream/actions)
 [![Tests](https://img.shields.io/github/actions/workflow/status/devmayank-official/dml-stream/ci-cd.yml?style=for-the-badge&logo=pytest&label=Tests)](https://github.com/devmayank-official/dml-stream/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/devmayank-official/dml-stream?style=for-the-badge&logo=codecov)](https://codecov.io/gh/devmayank-official/dml-stream)
-[![Docker Pulls](https://img.shields.io/docker/pulls/devmayank/dml-stream?style=for-the-badge&logo=docker)](https://ghcr.io/devmayank-official/dml-stream)
-[![Docker Image Size](https://img.shields.io/docker/image-size/devmayank/dml-stream/latest?style=for-the-badge&logo=docker)](https://ghcr.io/devmayank-official/dml-stream)
+[![Docker Image Size](https://img.shields.io/github/package-json/v/devmayank-official/dml-stream?style=for-the-badge&logo=docker&label=image%20size)](https://github.com/Devmayank-official/dml-stream/pkgs/container/dml-stream)
+[![GitHub Release](https://img.shields.io/github/v/release/devmayank-official/dml-stream?style=for-the-badge&logo=github)](https://github.com/Devmayank-official/dml-stream/releases)
 
 [![Platforms](https://img.shields.io/badge/Platforms-Windows%20%7C%20macOS%20%7C%20Linux-blue?style=for-the-badge&logo=windows)](https://github.com/devmayank-official/dml-stream)
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge&logo=python)](https://github.com/psf/black)
