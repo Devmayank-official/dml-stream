@@ -12,12 +12,12 @@ Fully cross-platform compatible: Windows, macOS, Linux
 """
 
 import os
-import sys
-import shutil
 import platform
+import shutil
 import subprocess
+import sys
 from pathlib import Path
-from typing import Optional, List, Dict, Any
+from typing import Any, Dict, List, Optional
 
 
 def get_platform() -> str:
@@ -74,7 +74,7 @@ def get_config_dir() -> Path:
         Path to configuration directory.
     """
     system = platform.system()
-    
+
     if system == 'Windows':
         # Use APPDATA for roaming config
         appdata = os.environ.get('APPDATA', '')
@@ -82,10 +82,10 @@ def get_config_dir() -> Path:
             return Path(appdata) / 'DML Labs' / 'DML Stream'
         else:
             return Path.home() / 'AppData' / 'Roaming' / 'DML Labs' / 'DML Stream'
-    
+
     elif system == 'Darwin':  # macOS
         return Path.home() / 'Library' / 'Application Support' / 'DML Stream'
-    
+
     else:  # Linux
         # Follow XDG Base Directory specification
         xdg_config = os.environ.get('XDG_CONFIG_HOME', '')
@@ -108,17 +108,17 @@ def get_data_dir() -> Path:
         Path to data directory.
     """
     system = platform.system()
-    
+
     if system == 'Windows':
         local_appdata = os.environ.get('LOCALAPPDATA', '')
         if local_appdata:
             return Path(local_appdata) / 'DML Labs' / 'DML Stream'
         else:
             return Path.home() / 'AppData' / 'Local' / 'DML Labs' / 'DML Stream'
-    
+
     elif system == 'Darwin':  # macOS
         return Path.home() / 'Library' / 'Application Support' / 'DML Stream'
-    
+
     else:  # Linux
         # Follow XDG Base Directory specification
         xdg_data = os.environ.get('XDG_DATA_HOME', '')
@@ -141,17 +141,17 @@ def get_cache_dir() -> Path:
         Path to cache directory.
     """
     system = platform.system()
-    
+
     if system == 'Windows':
         local_appdata = os.environ.get('LOCALAPPDATA', '')
         if local_appdata:
             return Path(local_appdata) / 'DML Labs' / 'DML Stream' / 'Cache'
         else:
             return Path.home() / 'AppData' / 'Local' / 'DML Labs' / 'DML Stream' / 'Cache'
-    
+
     elif system == 'Darwin':  # macOS
         return Path.home() / 'Library' / 'Caches' / 'DML Stream'
-    
+
     else:  # Linux
         # Follow XDG Base Directory specification
         xdg_cache = os.environ.get('XDG_CACHE_HOME', '')
@@ -204,11 +204,11 @@ def find_ffmpeg() -> Optional[str]:
     ffmpeg = shutil.which('ffmpeg')
     if ffmpeg:
         return ffmpeg
-    
+
     # Platform-specific locations
     system = platform.system()
     machine = platform.machine().lower()
-    
+
     if system == 'Windows':
         paths = [
             Path('C:/Program Files/ffmpeg/bin/ffmpeg.exe'),
@@ -234,12 +234,12 @@ def find_ffmpeg() -> Optional[str]:
             Path('/snap/bin/ffmpeg'),
             Path('/usr/local/sbin/ffmpeg'),
         ]
-    
+
     # Check each path
     for path in paths:
         if path.exists() and os.access(path, os.X_OK):
             return str(path)
-    
+
     return None
 
 
@@ -271,13 +271,13 @@ def make_executable(path: Path) -> bool:
     if platform.system() == 'Windows':
         # Windows doesn't have execute permission
         return True
-    
+
     try:
         import stat
         current_mode = path.stat().st_mode
         path.chmod(current_mode | stat.S_IEXEC | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)
         return True
-    except (OSError, IOError):
+    except OSError:
         return False
 
 
@@ -373,14 +373,14 @@ def open_file(path: Path) -> bool:
     """
     try:
         system = platform.system()
-        
+
         if system == 'Windows':
             os.startfile(str(path))
         elif system == 'Darwin':  # macOS
             subprocess.run(['open', str(path)], check=False)
         else:  # Linux
             subprocess.run(['xdg-open', str(path)], check=False)
-        
+
         return True
     except Exception:
         return False
@@ -462,7 +462,7 @@ def get_system_info() -> Dict[str, Any]:
     version = platform.version()
     machine = platform.machine()
     processor = platform.processor()
-    
+
     return {
         'platform': get_platform(),
         'system': system,

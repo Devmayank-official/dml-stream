@@ -15,7 +15,7 @@ class YouTubeDownloaderError(Exception):
     All custom exceptions in this application inherit from this base class.
     This allows for centralized error handling and consistent error reporting.
     """
-    
+
     def __init__(self, message: str, details: Optional[str] = None):
         """
         Initialize the exception.
@@ -27,7 +27,7 @@ class YouTubeDownloaderError(Exception):
         super().__init__(message)
         self.message = message
         self.details = details
-    
+
     def __str__(self) -> str:
         if self.details:
             return f"{self.message}: {self.details}"
@@ -43,7 +43,7 @@ class InvalidURLError(YouTubeDownloaderError):
     - The URL is malformed or incomplete
     - The URL points to a non-YouTube domain
     """
-    
+
     def __init__(self, url: str, message: Optional[str] = None):
         """
         Initialize the invalid URL error.
@@ -67,10 +67,10 @@ class DownloadError(YouTubeDownloaderError):
     - Stream unavailability
     - File write errors
     """
-    
+
     def __init__(
-        self, 
-        message: str, 
+        self,
+        message: str,
         url: Optional[str] = None,
         retryable: bool = True
     ):
@@ -96,7 +96,7 @@ class FFmpegNotFoundError(YouTubeDownloaderError):
     - Format conversion
     - Audio extraction
     """
-    
+
     def __init__(self, message: Optional[str] = None):
         """
         Initialize the FFmpeg not found error.
@@ -121,7 +121,7 @@ class NoStreamsFoundError(YouTubeDownloaderError):
     - The video has region restrictions
     - No streams match the requested criteria
     """
-    
+
     def __init__(self, message: str = "No streams found for the video."):
         """
         Initialize the no streams found error.
@@ -141,7 +141,7 @@ class ConfigurationError(YouTubeDownloaderError):
     - Missing required configuration
     - Configuration file corruption
     """
-    
+
     def __init__(self, message: str, config_key: Optional[str] = None):
         """
         Initialize the configuration error.
@@ -163,10 +163,10 @@ class ProcessError(YouTubeDownloaderError):
     - Conversion process failures
     - Merge process failures
     """
-    
+
     def __init__(
-        self, 
-        message: str, 
+        self,
+        message: str,
         process_type: Optional[str] = None,
         process_id: Optional[int] = None
     ):
@@ -190,7 +190,7 @@ class AuthenticationError(YouTubeDownloaderError):
     Note: Currently the application only supports public videos.
     This exception is reserved for future authentication features.
     """
-    
+
     def __init__(self, message: str = "Authentication required for this content."):
         """
         Initialize the authentication error.

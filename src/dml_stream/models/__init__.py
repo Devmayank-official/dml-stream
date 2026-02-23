@@ -6,19 +6,19 @@ the application for consistent data representation.
 """
 
 from dml_stream.models.entities import (
-    DownloadHistory,
-    ScheduledDownload,
-    ProcessInfo,
-    BatchDownloadItem,
     BatchDownload,
-    StreamCandidate,
+    BatchDownloadItem,
+    DownloadHistory,
     DownloadProgress,
+    ProcessInfo,
+    ScheduledDownload,
+    StreamCandidate,
 )
 from dml_stream.models.repositories import (
-    HistoryRepository,
-    ScheduledDownloadRepository,
     BatchDownloadRepository,
+    HistoryRepository,
     ProcessRepository,
+    ScheduledDownloadRepository,
 )
 
 __all__ = [

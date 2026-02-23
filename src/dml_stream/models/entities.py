@@ -6,18 +6,16 @@ such as downloads, processes, and batch operations.
 """
 
 import uuid
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from dml_stream.core.constants import (
-    PROCESS_STATUS_PENDING,
-    PROCESS_STATUS_RUNNING,
+    DOWNLOAD_TYPE_VIDEO,
     PROCESS_STATUS_COMPLETED,
     PROCESS_STATUS_FAILED,
-    DOWNLOAD_TYPE_VIDEO,
-    DOWNLOAD_TYPE_AUDIO,
-    DOWNLOAD_TYPE_PLAYLIST,
+    PROCESS_STATUS_PENDING,
+    PROCESS_STATUS_RUNNING,
 )
 
 
@@ -35,7 +33,7 @@ class DownloadHistory:
         download_type: Type of download ('video', 'audio', 'playlist').
         status: Download status ('success', 'failed').
     """
-    
+
     title: str
     url: str
     file_path: str
@@ -43,7 +41,7 @@ class DownloadHistory:
     download_date: str
     download_type: str  # 'video', 'audio', 'playlist'
     status: str  # 'success', 'failed'
-    
+
     @classmethod
     def create(
         cls,
@@ -79,7 +77,7 @@ class DownloadHistory:
                     size_bytes /= 1024.0
         except Exception:
             pass
-        
+
         return cls(
             title=title,
             url=url,
@@ -89,12 +87,12 @@ class DownloadHistory:
             download_type=download_type,
             status=status
         )
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         from dataclasses import asdict
         return asdict(self)
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'DownloadHistory':
         """Create instance from dictionary."""
@@ -120,7 +118,7 @@ class ScheduledDownload:
         created_at: ISO format timestamp of creation.
         completed_at: Optional ISO format timestamp of completion.
     """
-    
+
     id: str
     url: str
     download_type: str
@@ -133,7 +131,7 @@ class ScheduledDownload:
     status: str = PROCESS_STATUS_PENDING
     created_at: str = ""
     completed_at: Optional[str] = None
-    
+
     @classmethod
     def create(
         cls,
@@ -175,7 +173,7 @@ class ScheduledDownload:
             status=PROCESS_STATUS_PENDING,
             created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-    
+
     def is_due(self) -> bool:
         """
         Check if the scheduled download is due for execution.
@@ -196,12 +194,12 @@ class ScheduledDownload:
                 return now >= scheduled_datetime
             except ValueError:
                 return False
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         from dataclasses import asdict
         return asdict(self)
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ScheduledDownload':
         """Create instance from dictionary."""
@@ -225,7 +223,7 @@ class ProcessInfo:
         error_message: Optional error message if failed.
         download_type: Type of download ('video', 'audio', 'playlist').
     """
-    
+
     pid: int
     name: str
     url: str
@@ -236,7 +234,7 @@ class ProcessInfo:
     output_path: str = ""
     error_message: Optional[str] = None
     download_type: str = ""
-    
+
     @classmethod
     def create(
         cls,
@@ -266,7 +264,7 @@ class ProcessInfo:
             start_time=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             download_type=download_type
         )
-    
+
     def update_progress(self, progress: float, output_path: str = "") -> None:
         """
         Update process progress.
@@ -278,7 +276,7 @@ class ProcessInfo:
         self.progress = max(0.0, min(100.0, progress))
         if output_path:
             self.output_path = output_path
-    
+
     def complete(self, status: str = PROCESS_STATUS_COMPLETED, error_message: Optional[str] = None) -> None:
         """
         Mark process as completed.
@@ -291,24 +289,24 @@ class ProcessInfo:
         self.end_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         if error_message:
             self.error_message = error_message
-    
+
     def is_running(self) -> bool:
         """Check if process is currently running."""
         return self.status == PROCESS_STATUS_RUNNING
-    
+
     def is_completed(self) -> bool:
         """Check if process completed successfully."""
         return self.status == PROCESS_STATUS_COMPLETED
-    
+
     def is_failed(self) -> bool:
         """Check if process failed."""
         return self.status == PROCESS_STATUS_FAILED
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         from dataclasses import asdict
         return asdict(self)
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'ProcessInfo':
         """Create instance from dictionary."""
@@ -329,7 +327,7 @@ class BatchDownloadItem:
         output_format: Optional output format.
         max_speed: Optional speed limit.
     """
-    
+
     url: str
     download_type: str
     output_folder: str
@@ -337,7 +335,7 @@ class BatchDownloadItem:
     threads: int
     output_format: Optional[str] = None
     max_speed: Optional[float] = None
-    
+
     @classmethod
     def create(
         cls,
@@ -359,12 +357,12 @@ class BatchDownloadItem:
             output_format=output_format,
             max_speed=max_speed
         )
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         from dataclasses import asdict
         return asdict(self)
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'BatchDownloadItem':
         """Create instance from dictionary."""
@@ -385,7 +383,7 @@ class BatchDownload:
         completed_at: Optional completion timestamp.
         current_index: Current item being processed.
     """
-    
+
     id: str
     name: str
     items: List[BatchDownloadItem]
@@ -393,7 +391,7 @@ class BatchDownload:
     created_at: str = ""
     completed_at: Optional[str] = None
     current_index: int = 0
-    
+
     @classmethod
     def create(
         cls,
@@ -417,41 +415,41 @@ class BatchDownload:
             status=PROCESS_STATUS_PENDING,
             created_at=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
-    
+
     def add_item(self, item: BatchDownloadItem) -> None:
         """Add an item to the batch."""
         self.items.append(item)
-    
+
     def remove_item(self, index: int) -> bool:
         """Remove an item by index."""
         if 0 <= index < len(self.items):
             self.items.pop(index)
             return True
         return False
-    
+
     def get_progress(self) -> float:
         """Get overall batch progress percentage."""
         if not self.items:
             return 0.0
         return (self.current_index / len(self.items)) * 100.0
-    
+
     def is_complete(self) -> bool:
         """Check if batch is complete."""
         return self.current_index >= len(self.items)
-    
+
     def get_current_item(self) -> Optional[BatchDownloadItem]:
         """Get the current item being processed."""
         if 0 <= self.current_index < len(self.items):
             return self.items[self.current_index]
         return None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         from dataclasses import asdict
         data = asdict(self)
         data['items'] = [item.to_dict() if hasattr(item, 'to_dict') else item for item in self.items]
         return data
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'BatchDownload':
         """Create instance from dictionary."""
@@ -484,7 +482,7 @@ class StreamCandidate:
         filesize: File size in bytes.
         stream: Original pytubefix stream object.
     """
-    
+
     itag: int
     type: str
     mime: str
@@ -492,11 +490,11 @@ class StreamCandidate:
     abr: Optional[str]
     filesize: int
     stream: Any  # pytubefix.Stream object
-    
+
     def get_size_mb(self) -> float:
         """Get file size in megabytes."""
         return self.filesize / (1024 * 1024) if self.filesize else 0.0
-    
+
     def get_size_formatted(self) -> str:
         """Get human-readable file size."""
         if not self.filesize:
@@ -507,7 +505,7 @@ class StreamCandidate:
                 return f"{size:.2f}{unit}"
             size /= 1024.0
         return f"{size:.2f}TB"
-    
+
     def __str__(self) -> str:
         type_str = self.type.upper()
         res_str = self.resolution or 'N/A'
@@ -529,24 +527,24 @@ class DownloadProgress:
         percentage: Download percentage (0.0 to 100.0).
         status: Download status.
     """
-    
+
     total_bytes: int = 0
     downloaded_bytes: int = 0
     speed: float = 0.0
     eta_seconds: float = 0.0
     percentage: float = 0.0
     status: str = "pending"
-    
+
     @property
     def is_complete(self) -> bool:
         """Check if download is complete."""
         return self.percentage >= 100.0
-    
+
     @property
     def speed_mb(self) -> float:
         """Get speed in MB/s."""
         return self.speed / (1024 * 1024)
-    
+
     @property
     def eta_formatted(self) -> str:
         """Get formatted ETA string."""
@@ -561,7 +559,7 @@ class DownloadProgress:
         hours = int(self.eta_seconds / 3600)
         minutes = int((self.eta_seconds % 3600) / 60)
         return f"{hours}h {minutes}m"
-    
+
     def update(
         self,
         downloaded_bytes: int,
@@ -581,7 +579,7 @@ class DownloadProgress:
         self.speed = speed
         self.percentage = (downloaded_bytes / total_bytes * 100) if total_bytes > 0 else 0.0
         self.eta_seconds = (total_bytes - downloaded_bytes) / speed if speed > 0 else 0.0
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary representation."""
         return {

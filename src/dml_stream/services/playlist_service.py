@@ -7,15 +7,14 @@ progress tracking and error handling for individual videos.
 
 import logging
 import os
-from typing import Callable, Dict, List, Optional, Tuple
+from typing import Callable, Dict, List, Optional
 
 from pytubefix import Playlist
 
 from dml_stream.core.constants import (
-    DOWNLOAD_TYPE_VIDEO,
     DOWNLOAD_TYPE_AUDIO,
+    DOWNLOAD_TYPE_VIDEO,
 )
-from dml_stream.core.exceptions import DownloadError
 from dml_stream.models.entities import DownloadProgress
 from dml_stream.services.download_service import DownloadService
 from dml_stream.utilities.file_utils import ensure_dir, safe_filename
@@ -30,7 +29,7 @@ class PlaylistService:
     Provides methods for downloading all videos from a playlist
     with configurable options for each video.
     """
-    
+
     def __init__(
         self,
         output_folder: str = "downloads",
@@ -52,15 +51,15 @@ class PlaylistService:
         self.max_speed = max_speed
         self.progress_callback = progress_callback
         self._cancel_flag = False
-    
+
     def cancel(self) -> None:
         """Cancel current playlist download."""
         self._cancel_flag = True
-    
+
     def reset(self) -> None:
         """Reset cancellation flag."""
         self._cancel_flag = False
-    
+
     def get_playlist_info(self, url: str) -> Dict:
         """
         Get playlist information.
@@ -76,7 +75,7 @@ class PlaylistService:
         """
         try:
             playlist = Playlist(url)
-            
+
             return {
                 'title': playlist.title,
                 'url': url,
@@ -86,7 +85,7 @@ class PlaylistService:
             }
         except Exception as e:
             raise ValueError(f"Failed to get playlist info: {str(e)}")
-    
+
     def download_playlist(
         self,
         url: str,
@@ -114,23 +113,23 @@ class PlaylistService:
             ValueError: If URL is not a valid playlist.
         """
         self.reset()
-        
+
         try:
             playlist = Playlist(url)
         except Exception as e:
             raise ValueError(f"Invalid playlist URL: {str(e)}")
-        
+
         # Setup output folder
         playlist_name = safe_filename(playlist.title or "Playlist")
         base_folder = output_folder or self.output_folder
-        
+
         if download_type == DOWNLOAD_TYPE_AUDIO:
             folder = os.path.join(base_folder, "playlists", playlist_name, "audio")
         else:
             folder = os.path.join(base_folder, "playlists", playlist_name, "videos")
-        
+
         ensure_dir(folder)
-        
+
         # Track results
         results = {
             'playlist_title': playlist.title,
@@ -142,10 +141,10 @@ class PlaylistService:
             'errors': [],
             'files': []
         }
-        
+
         logger.info(f"Starting playlist download: {playlist.title}")
         logger.info(f"Total videos: {len(playlist.video_urls)}")
-        
+
         # Download each video
         download_service = DownloadService(
             output_folder=folder,
@@ -153,19 +152,19 @@ class PlaylistService:
             max_speed=self.max_speed,
             progress_callback=self.progress_callback
         )
-        
+
         for i, video_url in enumerate(playlist.video_urls):
             if self._cancel_flag:
                 logger.info("Playlist download cancelled by user")
                 break
-            
+
             try:
                 logger.info(f"Downloading video {i+1}/{len(playlist.video_urls)}")
-                
+
                 # Get video info
                 yt = playlist.videos[i]
                 filename = safe_filename(yt.title)
-                
+
                 # Check if already exists
                 if skip_existing:
                     existing_file = self._find_existing_file(folder, filename, output_format)
@@ -179,7 +178,7 @@ class PlaylistService:
                             'status': 'skipped'
                         })
                         continue
-                
+
                 # Download video or audio
                 if download_type == DOWNLOAD_TYPE_AUDIO:
                     file_path = download_service.download_audio(
@@ -195,7 +194,7 @@ class PlaylistService:
                         output_format=output_format,
                         method=method
                     )
-                
+
                 results['successful'] += 1
                 results['files'].append({
                     'title': yt.title,
@@ -203,9 +202,9 @@ class PlaylistService:
                     'path': file_path,
                     'status': 'success'
                 })
-                
+
                 logger.info(f"Successfully downloaded: {yt.title}")
-                
+
             except Exception as e:
                 results['failed'] += 1
                 results['errors'].append({
@@ -213,15 +212,15 @@ class PlaylistService:
                     'error': str(e)
                 })
                 logger.error(f"Failed to download {video_url}: {str(e)}")
-        
+
         # Log summary
-        logger.info(f"Playlist download completed")
+        logger.info("Playlist download completed")
         logger.info(f"Successful: {results['successful']}")
         logger.info(f"Failed: {results['failed']}")
         logger.info(f"Skipped: {results['skipped']}")
-        
+
         return results
-    
+
     def _find_existing_file(
         self,
         folder: str,
@@ -243,15 +242,15 @@ class PlaylistService:
             path = os.path.join(folder, f"{filename}.{output_format}")
             if os.path.exists(path):
                 return path
-        
+
         # Check common formats
         for ext in ['mp4', 'mkv', 'webm', 'mp3', 'm4a', 'wav']:
             path = os.path.join(folder, f"{filename}.{ext}")
             if os.path.exists(path):
                 return path
-        
+
         return None
-    
+
     def download_playlist_parallel(
         self,
         url: str,
@@ -288,7 +287,7 @@ class PlaylistService:
             method=method,
             output_format=output_format
         )
-    
+
     def get_playlist_videos(self, url: str) -> List[Dict]:
         """
         Get list of videos in a playlist.
@@ -302,7 +301,7 @@ class PlaylistService:
         try:
             playlist = Playlist(url)
             videos = []
-            
+
             for video in playlist.videos:
                 videos.append({
                     'title': video.title,
@@ -311,9 +310,9 @@ class PlaylistService:
                     'length': video.length,
                     'thumbnail': video.thumbnail_url,
                 })
-            
+
             return videos
-            
+
         except Exception as e:
             logger.error(f"Failed to get playlist videos: {str(e)}")
             return []

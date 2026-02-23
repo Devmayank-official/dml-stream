@@ -14,10 +14,9 @@ from datetime import datetime
 from typing import Callable, Dict, List, Optional
 
 from dml_stream.core.constants import (
-    SCHEDULE_CHECK_INTERVAL,
-    PROCESS_STATUS_PENDING,
     PROCESS_STATUS_COMPLETED,
     PROCESS_STATUS_FAILED,
+    SCHEDULE_CHECK_INTERVAL,
 )
 from dml_stream.models.entities import ScheduledDownload
 from dml_stream.models.repositories import ScheduledDownloadRepository
@@ -32,7 +31,7 @@ class ScheduleManager:
     Provides functionality for scheduling downloads and running
     them automatically via a background daemon thread.
     """
-    
+
     def __init__(
         self,
         persist_path: Optional[str] = None,
@@ -50,7 +49,7 @@ class ScheduleManager:
         self._daemon_thread: Optional[threading.Thread] = None
         self._daemon_running = False
         self._lock = threading.RLock()
-    
+
     def schedule_download(
         self,
         url: str,
@@ -88,26 +87,26 @@ class ScheduleManager:
             output_format=output_format,
             max_speed=max_speed
         )
-        
+
         logger.info(f"Scheduled download: {url} at {scheduled_time}")
         return scheduled
-    
+
     def get_scheduled(self, scheduled_id: str) -> Optional[ScheduledDownload]:
         """Get a scheduled download by ID."""
         return self._repository.get_by_id(scheduled_id)
-    
+
     def get_all_scheduled(self) -> List[ScheduledDownload]:
         """Get all scheduled downloads."""
         return self._repository.get_all()
-    
+
     def get_pending(self) -> List[ScheduledDownload]:
         """Get all pending scheduled downloads."""
         return self._repository.get_pending()
-    
+
     def get_due(self) -> List[ScheduledDownload]:
         """Get scheduled downloads that are due for execution."""
         return self._repository.get_due()
-    
+
     def cancel_scheduled(self, scheduled_id: str) -> bool:
         """
         Cancel a scheduled download.
@@ -119,7 +118,7 @@ class ScheduleManager:
             True if cancelled, False if not found.
         """
         return self._repository.remove_by_id(scheduled_id)
-    
+
     def cancel_all_pending(self) -> int:
         """
         Cancel all pending scheduled downloads.
@@ -128,7 +127,7 @@ class ScheduleManager:
             Number of cancelled downloads.
         """
         return self._repository.cancel_pending()
-    
+
     def update_status(
         self,
         scheduled_id: str,
@@ -137,7 +136,7 @@ class ScheduleManager:
     ) -> bool:
         """Update status of a scheduled download."""
         return self._repository.update_status(scheduled_id, status, completed_at)
-    
+
     def start_daemon(self) -> bool:
         """
         Start the background daemon thread for processing scheduled downloads.
@@ -149,7 +148,7 @@ class ScheduleManager:
             if self._daemon_running:
                 logger.warning("Daemon already running")
                 return False
-            
+
             self._daemon_running = True
             self._daemon_thread = threading.Thread(
                 target=self._daemon_loop,
@@ -157,10 +156,10 @@ class ScheduleManager:
                 name="ScheduleDaemon"
             )
             self._daemon_thread.start()
-            
+
             logger.info("Schedule daemon started")
             return True
-    
+
     def stop_daemon(self) -> bool:
         """
         Stop the background daemon thread.
@@ -171,35 +170,35 @@ class ScheduleManager:
         with self._lock:
             if not self._daemon_running:
                 return False
-            
+
             self._daemon_running = False
-            
+
             if self._daemon_thread:
                 self._daemon_thread.join(timeout=5)
                 self._daemon_thread = None
-            
+
             logger.info("Schedule daemon stopped")
             return True
-    
+
     def is_daemon_running(self) -> bool:
         """Check if daemon is running."""
         return self._daemon_running
-    
+
     def _daemon_loop(self) -> None:
         """
         Main daemon loop that checks and executes scheduled downloads.
         """
         logger.info("Daemon loop started")
-        
+
         while self._daemon_running:
             try:
                 # Get due scheduled downloads
                 due_downloads = self.get_due()
-                
+
                 for scheduled in due_downloads:
                     if not self._daemon_running:
                         break
-                    
+
                     try:
                         self._execute_scheduled(scheduled)
                     except Exception as e:
@@ -209,16 +208,16 @@ class ScheduleManager:
                             PROCESS_STATUS_FAILED,
                             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         )
-                
+
                 # Sleep until next check
                 time.sleep(SCHEDULE_CHECK_INTERVAL)
-                
+
             except Exception as e:
                 logger.error(f"Error in daemon loop: {str(e)}")
                 time.sleep(SCHEDULE_CHECK_INTERVAL)
-        
+
         logger.info("Daemon loop exited")
-    
+
     def _execute_scheduled(self, scheduled: ScheduledDownload) -> None:
         """
         Execute a scheduled download.
@@ -227,22 +226,22 @@ class ScheduleManager:
             scheduled: ScheduledDownload to execute.
         """
         logger.info(f"Executing scheduled download: {scheduled.url}")
-        
+
         # Update status to in-progress
         self.update_status(scheduled.id, "in_progress")
-        
+
         try:
             # Execute via callback
             if self._execute_callback:
                 self._execute_callback(scheduled)
-                
+
                 # Update status to completed
                 self.update_status(
                     scheduled.id,
                     PROCESS_STATUS_COMPLETED,
                     datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 )
-                
+
                 logger.info(f"Scheduled download completed: {scheduled.url}")
             else:
                 logger.warning("No execute callback configured")
@@ -251,7 +250,7 @@ class ScheduleManager:
                     PROCESS_STATUS_FAILED,
                     datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 )
-                
+
         except Exception as e:
             logger.error(f"Scheduled download failed: {str(e)}")
             self.update_status(
@@ -260,7 +259,7 @@ class ScheduleManager:
                 datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             )
             raise
-    
+
     def get_statistics(self) -> Dict:
         """
         Get schedule statistics.
@@ -271,14 +270,14 @@ class ScheduleManager:
         all_scheduled = self.get_all_scheduled()
         pending = self.get_pending()
         due = self.get_due()
-        
+
         return {
             'total': len(all_scheduled),
             'pending': len(pending),
             'due': len(due),
             'daemon_running': self._daemon_running,
         }
-    
+
     def clear_completed(self) -> int:
         """
         Remove all completed/failed scheduled downloads.
@@ -291,10 +290,10 @@ class ScheduleManager:
             s for s in all_scheduled
             if s.status in (PROCESS_STATUS_COMPLETED, PROCESS_STATUS_FAILED, PROCESS_STATUS_CANCELLED)
         ]
-        
+
         count = 0
         for scheduled in to_remove:
             if self.cancel_scheduled(scheduled.id):
                 count += 1
-        
+
         return count

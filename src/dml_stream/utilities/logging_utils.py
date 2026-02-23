@@ -9,15 +9,12 @@ import functools
 import json
 import logging
 import logging.handlers
-import os
-import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 from dml_stream.core.constants import (
-    LOG_LEVELS,
     CONSOLE_LOG_FORMAT,
     LOG_DATE_FORMAT,
 )
@@ -29,7 +26,7 @@ class JSONFormatter(logging.Formatter):
     
     Useful for structured logging and log aggregation systems.
     """
-    
+
     def format(self, record: logging.LogRecord) -> str:
         """Format log record as JSON."""
         log_entry = {
@@ -41,11 +38,11 @@ class JSONFormatter(logging.Formatter):
             'function': record.funcName,
             'line': record.lineno,
         }
-        
+
         # Add exception info if present
         if record.exc_info:
             log_entry['exception'] = self.formatException(record.exc_info)
-        
+
         # Add extra fields if present
         for key, value in record.__dict__.items():
             if key not in ('name', 'msg', 'args', 'created', 'filename', 'funcName',
@@ -58,7 +55,7 @@ class JSONFormatter(logging.Formatter):
                     log_entry[key] = value
                 except (TypeError, ValueError):
                     log_entry[key] = str(value)
-        
+
         return json.dumps(log_entry)
 
 
@@ -66,7 +63,7 @@ class ColoredConsoleHandler(logging.StreamHandler):
     """
     Console handler with colored output for different log levels.
     """
-    
+
     # ANSI color codes
     COLORS = {
         'DEBUG': '\033[36m',      # Cyan
@@ -76,15 +73,15 @@ class ColoredConsoleHandler(logging.StreamHandler):
         'CRITICAL': '\033[35m',   # Magenta
     }
     RESET = '\033[0m'
-    
+
     def emit(self, record: logging.LogRecord) -> None:
         """Emit a log record with color."""
         try:
             color = self.COLORS.get(record.levelname, self.RESET)
-            
+
             if self.stream and hasattr(self.stream, 'isatty') and self.stream.isatty():
                 record.levelname = f"{color}{record.levelname}{self.RESET}"
-            
+
             super().emit(record)
         except Exception:
             self.handleError(record)
@@ -115,10 +112,10 @@ def setup_logging(
     # Get root logger
     logger = logging.getLogger()
     logger.setLevel(getattr(logging, log_level.upper(), logging.INFO))
-    
+
     # Clear existing handlers
     logger.handlers.clear()
-    
+
     # Console handler
     if console_output:
         console_handler = ColoredConsoleHandler()
@@ -126,14 +123,14 @@ def setup_logging(
         console_formatter = logging.Formatter(CONSOLE_LOG_FORMAT, LOG_DATE_FORMAT)
         console_handler.setFormatter(console_formatter)
         logger.addHandler(console_handler)
-    
+
     # File handler
     if log_file:
         try:
             # Ensure log directory exists
             log_path = Path(log_file)
             log_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             if json_format:
                 file_handler = logging.handlers.RotatingFileHandler(
                     log_file,
@@ -151,13 +148,13 @@ def setup_logging(
                 )
                 file_formatter = logging.Formatter(CONSOLE_LOG_FORMAT, LOG_DATE_FORMAT)
                 file_handler.setFormatter(file_formatter)
-            
+
             file_handler.setLevel(logging.DEBUG)  # Log everything to file
             logger.addHandler(file_handler)
-            
+
         except Exception as e:
             logger.warning(f"Failed to set up log file '{log_file}': {str(e)}")
-    
+
     return logger
 
 
@@ -204,10 +201,10 @@ def log_function_call(
             nonlocal logger
             if logger is None:
                 logger = logging.getLogger(func.__module__)
-            
+
             # Log function call
             func_name = f"{func.__module__}.{func.__name__}"
-            
+
             if log_args:
                 args_str = ", ".join(
                     [repr(a) for a in args] +
@@ -216,25 +213,25 @@ def log_function_call(
                 logger.log(level, f"Calling {func_name}({args_str})")
             else:
                 logger.log(level, f"Calling {func_name}")
-            
+
             # Execute function and measure time
             start_time = time.time()
             try:
                 result = func(*args, **kwargs)
                 elapsed = time.time() - start_time
-                
+
                 if log_result:
                     logger.log(level, f"{func_name} returned: {result!r} ({elapsed:.3f}s)")
                 else:
                     logger.log(level, f"{func_name} completed ({elapsed:.3f}s)")
-                
+
                 return result
-                
+
             except Exception as e:
                 elapsed = time.time() - start_time
                 logger.error(f"{func_name} raised {type(e).__name__}: {str(e)} ({elapsed:.3f}s)")
                 raise
-        
+
         return wrapper
     return decorator
 
@@ -247,7 +244,7 @@ class LogContext:
         with LogContext(logger, user_id=123, action="download"):
             perform_download()
     """
-    
+
     def __init__(self, logger: logging.Logger, **context: Any) -> None:
         """
         Initialize log context.
@@ -259,20 +256,20 @@ class LogContext:
         self.logger = logger
         self.context = context
         self.old_factory = None
-    
+
     def __enter__(self) -> 'LogContext':
         """Add context to logger."""
         self.old_factory = logging.getLogRecordFactory()
-        
+
         def record_factory(*args, **kwargs):
             record = self.old_factory(*args, **kwargs)
             for key, value in self.context.items():
                 setattr(record, key, value)
             return record
-        
+
         logging.setLogRecordFactory(record_factory)
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Remove context from logger."""
         if self.old_factory:
@@ -287,7 +284,7 @@ class PerformanceLogger:
         with PerformanceLogger(logger, "Database query"):
             result = db.query()
     """
-    
+
     def __init__(
         self,
         logger: logging.Logger,
@@ -309,19 +306,19 @@ class PerformanceLogger:
         self.level = level
         self.threshold = threshold
         self.start_time: Optional[float] = None
-    
+
     def __enter__(self) -> 'PerformanceLogger':
         """Start timing."""
         self.start_time = time.time()
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         """Log performance."""
         if self.start_time is None:
             return
-        
+
         elapsed = time.time() - self.start_time
-        
+
         if exc_type:
             self.logger.error(f"{self.operation} failed after {elapsed:.3f}s")
         elif self.threshold and elapsed > self.threshold:
@@ -352,7 +349,7 @@ def log_execution_time(
             nonlocal logger
             if logger is None:
                 logger = logging.getLogger(func.__module__)
-            
+
             start = time.time()
             try:
                 result = func(*args, **kwargs)

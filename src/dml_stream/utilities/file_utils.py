@@ -15,7 +15,7 @@ import tempfile
 from pathlib import Path
 from typing import List, Optional
 
-from dml_stream.core.constants import INVALID_FILENAME_CHARS, MAX_FILENAME_LENGTH
+from dml_stream.core.constants import MAX_FILENAME_LENGTH
 
 
 def safe_filename(filename: str, max_length: int = MAX_FILENAME_LENGTH) -> str:
@@ -37,44 +37,44 @@ def safe_filename(filename: str, max_length: int = MAX_FILENAME_LENGTH) -> str:
     """
     if not filename:
         return "unnamed"
-    
+
     # Separate name and extension
     name, ext = os.path.splitext(filename)
-    
+
     # Remove invalid characters
     # Keep: alphanumeric, spaces, dots, underscores, hyphens
     safe_name = "".join(
-        c for c in name 
+        c for c in name
         if c.isalnum() or c in " ._-"
     )
-    
+
     # Replace multiple spaces/dots with single
     safe_name = re.sub(r'[ .]+', '.', safe_name.strip())
-    
+
     # Remove leading/trailing dots and spaces
     safe_name = safe_name.strip(" .")
-    
+
     # Truncate if too long (preserve extension)
     if len(safe_name) > max_length:
         # Try to preserve word boundary
         truncated = safe_name[:max_length]
         last_space = truncated.rfind(' ')
         last_dot = truncated.rfind('.')
-        
+
         if last_space > max_length // 2:
             safe_name = truncated[:last_space]
         elif last_dot > max_length // 2:
             safe_name = truncated[:last_dot]
         else:
             safe_name = truncated
-    
+
     # Ensure we have at least some name
     if not safe_name:
         safe_name = "file"
-    
+
     # Clean extension
     ext = ext.lower().strip('.')
-    
+
     if ext:
         return f"{safe_name}.{ext}"
     return safe_name
@@ -112,18 +112,18 @@ def format_file_size(size_bytes: int) -> str:
     """
     if size_bytes < 0:
         return "Invalid size"
-    
+
     if size_bytes == 0:
         return "0 B"
-    
+
     units = ['B', 'KB', 'MB', 'GB', 'TB']
     unit_index = 0
     size = float(size_bytes)
-    
+
     while size >= 1024 and unit_index < len(units) - 1:
         size /= 1024
         unit_index += 1
-    
+
     if unit_index == 0:
         return f"{int(size)} {units[unit_index]}"
     return f"{size:.2f} {units[unit_index]}"
@@ -141,19 +141,19 @@ def format_duration(seconds: int) -> str:
     """
     if seconds < 0:
         return "Invalid duration"
-    
+
     if seconds < 60:
         return f"{seconds}s"
-    
+
     if seconds < 3600:
         minutes = seconds // 60
         secs = seconds % 60
         return f"{minutes}m {secs}s" if secs else f"{minutes}m"
-    
+
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     secs = seconds % 60
-    
+
     parts = []
     if hours:
         parts.append(f"{hours}h")
@@ -161,7 +161,7 @@ def format_duration(seconds: int) -> str:
         parts.append(f"{minutes}m")
     if secs:
         parts.append(f"{secs}s")
-    
+
     return " ".join(parts)
 
 
@@ -240,7 +240,7 @@ def check_disk_space(
     available = get_available_disk_space(path)
     if available < 0:
         return True  # Can't determine, assume OK
-    
+
     required_with_margin = int(required_bytes * safety_margin)
     return available >= required_with_margin
 
@@ -261,7 +261,7 @@ def cleanup_temp_files(
     """
     if temp_dir is None:
         temp_dir = tempfile.gettempdir()
-    
+
     count = 0
     try:
         temp_path = Path(temp_dir)
@@ -273,7 +273,7 @@ def cleanup_temp_files(
                 pass
     except Exception:
         pass
-    
+
     return count
 
 
@@ -326,7 +326,7 @@ def delete_file(path: str, force: bool = False) -> bool:
     """
     if not os.path.exists(path):
         return False
-    
+
     try:
         if force and os.name == 'nt':
             # Try to delete even if in use
@@ -354,11 +354,11 @@ def move_file(src: str, dst: str, overwrite: bool = True) -> bool:
     try:
         if os.path.exists(dst) and not overwrite:
             return False
-        
+
         dst_dir = os.path.dirname(dst)
         if dst_dir:
             ensure_dir(dst_dir)
-        
+
         shutil.move(src, dst)
         return True
     except Exception:
@@ -380,11 +380,11 @@ def copy_file(src: str, dst: str, overwrite: bool = True) -> bool:
     try:
         if os.path.exists(dst) and not overwrite:
             return False
-        
+
         dst_dir = os.path.dirname(dst)
         if dst_dir:
             ensure_dir(dst_dir)
-        
+
         shutil.copy2(src, dst)
         return True
     except Exception:

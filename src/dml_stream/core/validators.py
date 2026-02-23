@@ -7,14 +7,12 @@ including URLs, file paths, and configuration values.
 Fully cross-platform compatible: Windows, macOS, Linux
 """
 
-import os
-import re
 import platform
+import re
 from pathlib import Path
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 from dml_stream.config.settings import Config
-from dml_stream.core.exceptions import InvalidURLError
 
 
 def validate_youtube_url(url: str) -> Tuple[bool, str]:
@@ -36,9 +34,9 @@ def validate_youtube_url(url: str) -> Tuple[bool, str]:
     """
     if not url or not isinstance(url, str):
         return False, "URL must be a non-empty string"
-    
+
     url = url.strip()
-    
+
     # Comprehensive YouTube URL regex pattern
     youtube_patterns = [
         # Standard watch URL
@@ -54,21 +52,21 @@ def validate_youtube_url(url: str) -> Tuple[bool, str]:
         # Live URL
         r'^(https?:\/\/)?(www\.)?youtube\.com\/live\/[\w-]{11}(\?[\w=&]*)?$',
     ]
-    
+
     for pattern in youtube_patterns:
         if re.match(pattern, url, re.IGNORECASE):
             return True, ""
-    
+
     # Extract video ID if possible for better error message
     video_id_pattern = r'([?&]v=|\.be\/|\/embed\/|\/shorts\/)([\w-]{11})'
     match = re.search(video_id_pattern, url)
-    
+
     if match:
         return False, (
             f"URL appears to be incomplete or malformed. "
             f"Extracted video ID: {match.group(2)}"
         )
-    
+
     return False, "Invalid YouTube URL format. Please provide a valid YouTube video or playlist URL."
 
 
@@ -86,16 +84,16 @@ def validate_threads(threads: int, config: Optional[Config] = None) -> Tuple[boo
     """
     if config is None:
         config = Config()
-    
+
     if not isinstance(threads, int):
         return False, f"Threads must be an integer, got {type(threads).__name__}"
-    
+
     if threads < config.min_threads:
         return False, f"Threads must be at least {config.min_threads}"
-    
+
     if threads > config.max_threads:
         return False, f"Threads must be at most {config.max_threads}"
-    
+
     return True, ""
 
 
@@ -120,30 +118,30 @@ def validate_output_folder(folder_path: str) -> Tuple[bool, str]:
     """
     if not folder_path or not isinstance(folder_path, str):
         return False, "Folder path must be a non-empty string"
-    
+
     folder_path = folder_path.strip()
-    
+
     # Convert to Path object for cross-platform handling
     path = Path(folder_path)
-    
+
     # Check for invalid characters (excluding Windows drive letter colon)
     # Allow : only in Windows drive letters (e.g., C:)
     check_path = str(path)
     if platform.system() == 'Windows' and len(check_path) >= 2 and check_path[1] == ':':
         check_path = check_path[2:]
-    
+
     # Invalid characters for file systems
     invalid_chars = '<>"|?*'
-    
+
     for char in invalid_chars:
         if char in check_path:
             return False, f"Folder path contains invalid character: '{char}'"
-    
+
     # Check path length (Windows has 260 character limit by default)
     max_path_length = 260 if platform.system() == 'Windows' else 4096
     if len(str(path)) > max_path_length - 50:  # Leave room for filenames
         return False, f"Folder path is too long (max {max_path_length - 50} characters)"
-    
+
     # Check if parent directory exists or is root
     try:
         parent = path.parent if path.parent != path else Path('.')
@@ -151,7 +149,7 @@ def validate_output_folder(folder_path: str) -> Tuple[bool, str]:
             return False, f"Parent directory does not exist: {parent}"
     except (OSError, RuntimeError):
         pass  # Continue to writability test
-    
+
     # Check if path is writable (try to create if doesn't exist)
     try:
         if not path.exists():
@@ -165,7 +163,7 @@ def validate_output_folder(folder_path: str) -> Tuple[bool, str]:
             try:
                 test_file.write_text('test')
                 test_file.unlink()
-            except (IOError, OSError, PermissionError):
+            except (OSError, PermissionError):
                 return False, "Folder is not writable"
     except PermissionError:
         return False, "Permission denied: Cannot create or write to folder"
@@ -173,7 +171,7 @@ def validate_output_folder(folder_path: str) -> Tuple[bool, str]:
         return False, f"OS error: {str(e)}"
     except Exception as e:
         return False, f"Unexpected error: {str(e)}"
-    
+
     return True, ""
 
 
@@ -192,17 +190,17 @@ def validate_video_id(video_id: str) -> Tuple[bool, str]:
     """
     if not video_id or not isinstance(video_id, str):
         return False, "Video ID must be a non-empty string"
-    
+
     video_id = video_id.strip()
-    
+
     if len(video_id) != 11:
         return False, f"Video ID must be exactly 11 characters, got {len(video_id)}"
-    
+
     # YouTube video ID pattern: alphanumeric, hyphen, underscore
     pattern = r'^[\w-]{11}$'
     if not re.match(pattern, video_id):
         return False, "Video ID contains invalid characters"
-    
+
     return True, ""
 
 
@@ -218,17 +216,17 @@ def validate_download_speed(speed: Optional[float]) -> Tuple[bool, str]:
     """
     if speed is None:
         return True, ""
-    
+
     if not isinstance(speed, (int, float)):
         return False, "Speed must be a number"
-    
+
     if speed <= 0:
         return False, "Speed must be greater than 0"
-    
+
     # Minimum 1 KB/s
     if speed < 1024:
         return False, "Speed must be at least 1 KB/s (1024 bytes/s)"
-    
+
     return True, ""
 
 
@@ -243,23 +241,23 @@ def validate_format_extension(ext: str, format_type: str = 'video') -> Tuple[boo
     Returns:
         Tuple of (is_valid, error_message).
     """
-    from dml_stream.core.constants import VIDEO_FORMATS, AUDIO_FORMATS
-    
+    from dml_stream.core.constants import AUDIO_FORMATS, VIDEO_FORMATS
+
     if not ext or not isinstance(ext, str):
         return False, "Extension must be a non-empty string"
-    
+
     ext = ext.lower().lstrip('.')
-    
+
     if format_type == 'video':
         valid_formats = VIDEO_FORMATS
     elif format_type == 'audio':
         valid_formats = AUDIO_FORMATS
     else:
         return False, f"Invalid format type: {format_type}. Must be 'video' or 'audio'"
-    
+
     if ext not in valid_formats:
         return False, f"Invalid {format_type} format: {ext}. Valid formats: {', '.join(valid_formats)}"
-    
+
     return True, ""
 
 
@@ -274,7 +272,7 @@ def get_platform_info() -> dict:
     release = platform.release()
     version = platform.version()
     machine = platform.machine()
-    
+
     return {
         'system': system,  # 'Windows', 'Darwin' (macOS), 'Linux'
         'release': release,

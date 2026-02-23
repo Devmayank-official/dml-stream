@@ -9,9 +9,9 @@ import sys
 from typing import Optional
 
 import click
+from rich import print as rprint
 from rich.console import Console
 from rich.panel import Panel
-from rich import print as rprint
 
 from dml_stream import __version__
 from dml_stream.config.settings import Config
@@ -65,7 +65,7 @@ def cli(ctx: click.Context, verbose: bool, config: Optional[str]) -> None:
     ctx.obj['verbose'] = verbose
     ctx.obj['config_path'] = config
     ctx.obj['config'] = Config.load_from_file(config) if config else Config()
-    
+
     # Setup logging
     log_level = "DEBUG" if verbose else "INFO"
     setup_logging(
@@ -86,7 +86,7 @@ def interactive(ctx: click.Context) -> None:
     with real-time progress tracking.
     """
     from dml_stream.cli.interactive import InteractiveApp
-    
+
     console.print(
         Panel.fit(
             "[bold blue]YouTube Downloader[/bold blue] - Interactive Mode\n\n"
@@ -94,7 +94,7 @@ def interactive(ctx: click.Context) -> None:
             border_style="blue"
         )
     )
-    
+
     app = InteractiveApp(config=ctx.obj['config'])
     app.run()
 
@@ -104,19 +104,19 @@ def interactive(ctx: click.Context) -> None:
 def version(ctx: click.Context) -> None:
     """Show version information."""
     from dml_stream import __version__
-    
+
     rprint(f"[bold blue]YouTube Downloader[/bold blue] v{__version__}")
     rprint(f"[dim]Python {sys.version}[/dim]")
 
 
 # Import and register subcommands
 from dml_stream.cli.commands import (
-    download_video,
+    config_command,
     download_audio,
     download_playlist,
-    service,
+    download_video,
     history,
-    config_command,
+    service,
 )
 
 cli.add_command(download_video, "download")

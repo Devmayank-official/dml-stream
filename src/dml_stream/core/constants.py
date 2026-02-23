@@ -7,9 +7,8 @@ for consistent configuration and maintainability.
 Fully cross-platform compatible: Windows, macOS, Linux
 """
 
-from typing import Dict, Any, List, Final
 import platform
-
+from typing import Any, Dict, Final, List
 
 # =============================================================================
 # FORMAT CONSTANTS
@@ -115,30 +114,30 @@ DEFAULT_CONFIG: Final[Dict[str, Any]] = {
     'max_threads': MAX_THREADS,
     'min_threads': MIN_THREADS,
     'default_method': 'normal',  # 'normal' or 'fast'
-    
+
     # File paths
     'config_file_path': 'config.json',
     'history_file_path': 'download_history.json',
     'scheduled_downloads_file_path': 'scheduled_downloads.json',
     'batch_downloads_file_path': 'batch_downloads.json',
     'log_file_path': 'app.log.json',
-    
+
     # Log settings
     'log_max_bytes': 10 * 1024 * 1024,  # 10 MB
     'log_backup_count': 5,
     'log_level': 'INFO',
-    
+
     # Feature flags
     'enable_scheduled_downloads': True,
     'enable_batch_downloads': True,
     'enable_process_tracking': True,
     'enable_download_history': True,
-    
+
     # Network settings
     'request_timeout': TIMEOUT_SECONDS,
     'max_retries': MAX_RETRIES,
     'retry_delay': 5,  # seconds
-    
+
     # UI settings
     'enable_rich_console': True,
     'color_theme': 'default',
