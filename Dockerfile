@@ -28,6 +28,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 # Install Python dependencies
 COPY pyproject.toml .
 COPY requirements.txt .
+COPY src/ ./src/
+COPY README.md .
+COPY LICENSE .
 RUN pip install --upgrade pip && \
     pip install .[dev]
 
