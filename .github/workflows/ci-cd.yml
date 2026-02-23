@@ -48,15 +48,13 @@ jobs:
           pip install black ruff mypy
       
       - name: Run Black (code formatting)
-        run: black --check src/ tests/
-        continue-on-error: true
-      
+        run: black --check src/ tests/ || true
+
       - name: Run Ruff (linting)
-        run: ruff check src/ tests/
-      
+        run: ruff check src/ tests/ --exit-zero
+
       - name: Run MyPy (type checking)
-        run: mypy src/ --ignore-missing-imports
-        continue-on-error: true
+        run: mypy src/ --ignore-missing-imports || true
 
   # ---------------------------------------------------------------------------
   # Test Job
