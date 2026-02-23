@@ -12,7 +12,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from dml_stream.core.constants import AUDIO_FORMATS, VIDEO_FORMATS
 from dml_stream.core.exceptions import FFmpegNotFoundError
