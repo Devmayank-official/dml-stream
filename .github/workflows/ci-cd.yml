@@ -9,10 +9,10 @@ name: CI/CD
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, master, develop]
     tags: ['v*']
   pull_request:
-    branches: [main, develop]
+    branches: [main, master, develop]
   schedule:
     # Run tests weekly to catch dependency issues
     - cron: '0 0 * * 0'
