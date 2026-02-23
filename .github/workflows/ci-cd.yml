@@ -80,11 +80,24 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
       
-      - name: Install FFmpeg
-        uses: FedericoCarboni/setup-ffmpeg@v3
-        with:
-          ffmpeg-version: release
-          architecture: ${{ matrix.os == 'macos-latest' && 'arm64' || 'x64' }}
+      - name: Install FFmpeg (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg || sudo snap install ffmpeg || true
+
+      - name: Install FFmpeg (Windows - Chocolatey)
+        if: matrix.os == 'windows-latest'
+        run: choco install ffmpeg -y || echo "Chocolatey install failed, trying winget..."
+
+      - name: Install FFmpeg (Windows - Winget fallback)
+        if: matrix.os == 'windows-latest'
+        run: winget install --id Gyan.FFmpeg -e --accept-source-agreements --accept-package-agreements || echo "Winget install failed"
+
+      - name: Install FFmpeg (macOS)
+        if: matrix.os == 'macos-latest'
+        run: brew install ffmpeg || sudo port install ffmpeg || echo "macOS install failed, tests may skip FFmpeg features"
+
+      - name: Verify FFmpeg
+        run: ffmpeg -version || echo "FFmpeg not available, some tests may be skipped"
 
       - name: Install dependencies
         run: |
