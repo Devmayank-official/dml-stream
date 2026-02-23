@@ -1,0 +1,159 @@
+# =============================================================================
+# YouTube Downloader - .gitignore
+# Enterprise-Level Terminal-Based YouTube Video Download Solution
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Python
+# -----------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+*.egg-info/
+*.egg
+.installed.cfg
+*.egg-link
+*.manifest
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+
+# -----------------------------------------------------------------------------
+# Project Data Files
+# -----------------------------------------------------------------------------
+# Download directories
+downloads/
+*.mp4
+*.mkv
+*.avi
+*.mov
+*.flv
+*.webm
+*.wmv
+*.mp3
+*.m4a
+*.flac
+*.wav
+*.aac
+*.opus
+
+# Configuration and data files (generated at runtime)
+config.json
+download_history.json
+scheduled_downloads.json
+batch_downloads.json
+app.log.json
+
+# -----------------------------------------------------------------------------
+# Logs
+# -----------------------------------------------------------------------------
+*.log
+logs/
+*.log.*
+
+# -----------------------------------------------------------------------------
+# IDE and Editors
+# -----------------------------------------------------------------------------
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Vim / Emacs
+*.swp
+*.swo
+*~
+.*.swp
+*.elc
+
+# Eclipse
+.project
+.pydevproject
+.settings/
+
+# -----------------------------------------------------------------------------
+# Testing
+# -----------------------------------------------------------------------------
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+htmlcov/
+
+# -----------------------------------------------------------------------------
+# OS Files
+# -----------------------------------------------------------------------------
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# -----------------------------------------------------------------------------
+# Environment Variables
+# -----------------------------------------------------------------------------
+.env
+.env.local
+.env.*.local
+*.env
+
+# -----------------------------------------------------------------------------
+# Temporary Files
+# -----------------------------------------------------------------------------
+tmp/
+temp/
+*.tmp
+*.bak
+*.temp
+.cache/
+
+# -----------------------------------------------------------------------------
+# Documentation Build
+# -----------------------------------------------------------------------------
+docs/_build/
+docs/.doctrees/
+
+# -----------------------------------------------------------------------------
+# Docker
+# -----------------------------------------------------------------------------
+.docker/
+
+# -----------------------------------------------------------------------------
+# Keep essential config files
+# -----------------------------------------------------------------------------
+!pyproject.toml
+!requirements.txt
+!README.md
+!LICENSE
+!.env.example
+!Dockerfile
+!.dockerignore

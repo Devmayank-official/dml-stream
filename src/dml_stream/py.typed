@@ -1,0 +1,2 @@
+# File required for PEP 561 to indicate this package has type hints
+# This file can be empty - its presence indicates type hints are included
