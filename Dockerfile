@@ -107,11 +107,11 @@ CMD ["interactive"]
 # -----------------------------------------------------------------------------
 FROM production as development
 
-# Install development dependencies
-RUN pip install -e .[dev,docs]
-
-# Switch back to root for development
+# Switch to root to install dev dependencies
 USER root
+
+# Install development dependencies (non-editable for Docker compatibility)
+RUN pip install .[dev,docs]
 
 # Install additional development tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
