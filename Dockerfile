@@ -29,7 +29,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 COPY pyproject.toml .
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install -e .[dev]
+    pip install .[dev]
 
 # -----------------------------------------------------------------------------
 # Stage 2: Production Stage
