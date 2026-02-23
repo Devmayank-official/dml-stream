@@ -18,6 +18,11 @@ on:
     - cron: '0 0 * * 0'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
 env:
   PYTHON_VERSION: '3.11'
   REGISTRY: ghcr.io
