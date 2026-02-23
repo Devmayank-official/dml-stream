@@ -12,7 +12,10 @@ import re
 from pathlib import Path
 from typing import Optional, Tuple
 
-from dml_stream.config.settings import Config
+
+# Default thread limits (avoid circular import with Config)
+DEFAULT_MIN_THREADS = 1
+DEFAULT_MAX_THREADS = 12
 
 
 def validate_youtube_url(url: str) -> Tuple[bool, str]:
@@ -70,29 +73,27 @@ def validate_youtube_url(url: str) -> Tuple[bool, str]:
     return False, "Invalid YouTube URL format. Please provide a valid YouTube video or playlist URL."
 
 
-def validate_threads(threads: int, config: Optional[Config] = None) -> Tuple[bool, str]:
+def validate_threads(threads: int, min_threads: int = DEFAULT_MIN_THREADS, max_threads: int = DEFAULT_MAX_THREADS) -> Tuple[bool, str]:
     """
     Validate if the number of threads is within acceptable range.
-    
+
     Args:
         threads: Number of threads to validate.
-        config: Optional Config instance. Uses defaults if not provided.
-        
+        min_threads: Minimum allowed threads (default: 1).
+        max_threads: Maximum allowed threads (default: 12).
+
     Returns:
         Tuple of (is_valid, error_message).
         If valid, error_message will be an empty string.
     """
-    if config is None:
-        config = Config()
-
     if not isinstance(threads, int):
         return False, f"Threads must be an integer, got {type(threads).__name__}"
 
-    if threads < config.min_threads:
-        return False, f"Threads must be at least {config.min_threads}"
+    if threads < min_threads:
+        return False, f"Threads must be at least {min_threads}"
 
-    if threads > config.max_threads:
-        return False, f"Threads must be at most {config.max_threads}"
+    if threads > max_threads:
+        return False, f"Threads must be at most {max_threads}"
 
     return True, ""
 
