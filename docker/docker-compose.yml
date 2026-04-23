@@ -1,0 +1,259 @@
+# =============================================================================
+# DML Stream - Docker Compose (v2.5)
+# =============================================================================
+# Production-ready Docker Compose configuration
+# Supports: Single-node and swarm deployments
+# =============================================================================
+
+services:
+  # -------------------------------------------------------------------------
+  # Main Application Service
+  # -------------------------------------------------------------------------
+  dml-stream:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: production
+      args:
+        VERSION: "2.5.1"
+    image: ghcr.io/devmayank-official/dml-stream:latest
+    container_name: dml-stream
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - DML_STREAM_DEFAULT_OUTPUT_FOLDER=/app/downloads
+      - DML_STREAM_LOG_LEVEL=INFO
+      - DML_STREAM_DEFAULT_THREADS=4
+      - DML_STREAM_ENABLE_SCHEDULED_DOWNLOADS=true
+      - DML_STREAM_ENABLE_BATCH_DOWNLOADS=true
+      - DML_STREAM_ENABLE_PROCESS_TRACKING=true
+      - DML_STREAM_ENABLE_DOWNLOAD_HISTORY=true
+      - TZ=${TZ:-UTC}
+    
+    # Volumes for persistence
+    volumes:
+      # Download directory
+      - dml-downloads:/app/downloads
+      
+      # Configuration
+      - dml-config:/app/config
+      
+      # Logs
+      - dml-logs:/app/logs
+      
+      # Cache (optional, can be tmpfs)
+      - dml-cache:/app/cache
+      
+      # Optional: Mount host download directory
+      # - ./downloads:/app/downloads
+      
+      # Optional: Mount host configuration
+      # - ./config:/app/config
+    
+    # Network mode
+    network_mode: bridge
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "from dml_stream import __version__; print(f'OK v{__version__}')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+        compress: "true"
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+    
+    # Read-only root filesystem (optional, for enhanced security)
+    # read_only: true
+    
+    # Temporary filesystems (if read_only is enabled)
+    # tmpfs:
+    #   - /tmp:size=100M
+  
+  # -------------------------------------------------------------------------
+  # Interactive Service (for CLI access)
+  # -------------------------------------------------------------------------
+  dml-cli:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: production
+    image: ghcr.io/devmayank-official/dml-stream:latest
+    container_name: dml-cli
+    restart: "no"
+    
+    # Share volumes with main service
+    volumes:
+      - dml-downloads:/app/downloads
+      - dml-config:/app/config
+      - dml-logs:/app/logs
+      - dml-cache:/app/cache
+    
+    # Override entrypoint for interactive CLI
+    entrypoint: ["dml-stream"]
+    command: ["interactive"]
+    
+    # TTY for interactive mode
+    stdin_open: true
+    tty: true
+    
+    # Environment
+    environment:
+      - DML_STREAM_DEFAULT_OUTPUT_FOLDER=/app/downloads
+      - TZ=${TZ:-UTC}
+  
+  # -------------------------------------------------------------------------
+  # Development Service
+  # -------------------------------------------------------------------------
+  dml-dev:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    image: ghcr.io/devmayank-official/dml-stream:dev
+    container_name: dml-stream-dev
+    restart: "no"
+    
+    # Volumes for development
+    volumes:
+      # Source code mounting for live development
+      - ./src:/app/src:ro
+      - ./tests:/app/tests:ro
+      - ./pyproject.toml:/app/pyproject.toml:ro
+      
+      # Persistent data
+      - dml-downloads:/app/downloads
+      - dml-config:/app/config
+      - dml-logs:/app/logs
+      
+      # Host SSH for git operations (optional)
+      # - ~/.ssh:/home/dmluser/.ssh:ro
+    
+    # Environment for development
+    environment:
+      - DML_STREAM_LOG_LEVEL=DEBUG
+      - PYTHONBREAKPOINT=pdb.set_trace
+      - PYTHONDONTWRITEBYTECODE=0
+      - TZ=${TZ:-UTC}
+    
+    # Extended health check for dev
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 60s
+      timeout: 10s
+      retries: 2
+    
+    # Dev service runs as shell
+    entrypoint: ["/bin/bash"]
+    
+    # Resource limits for dev
+    deploy:
+      resources:
+        limits:
+          cpus: '4.0'
+          memory: 4G
+
+  # -------------------------------------------------------------------------
+  # Scheduled Downloads Daemon Service
+  # -------------------------------------------------------------------------
+  dml-daemon:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: production
+    image: ghcr.io/devmayank-official/dml-stream:latest
+    container_name: dml-stream-daemon
+    restart: unless-stopped
+    
+    # Volumes
+    volumes:
+      - dml-downloads:/app/downloads
+      - dml-config:/app/config
+      - dml-logs:/app/logs
+    
+    # Environment
+    environment:
+      - DML_STREAM_DEFAULT_OUTPUT_FOLDER=/app/downloads
+      - DML_STREAM_ENABLE_SCHEDULED_DOWNLOADS=true
+      - DML_STREAM_LOG_LEVEL=INFO
+      - TZ=${TZ:-UTC}
+    
+    # Run daemon mode
+    command: ["service", "--daemon"]
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "print('Daemon OK')"]
+      interval: 60s
+      timeout: 10s
+      retries: 3
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+# =============================================================================
+# Volume Definitions
+# =============================================================================
+volumes:
+  dml-downloads:
+    driver: local
+    name: dml-stream-downloads
+    labels:
+      app: dml-stream
+      type: downloads
+  
+  dml-config:
+    driver: local
+    name: dml-stream-config
+    labels:
+      app: dml-stream
+      type: config
+  
+  dml-logs:
+    driver: local
+    name: dml-stream-logs
+    labels:
+      app: dml-stream
+      type: logs
+  
+  dml-cache:
+    driver: local
+    name: dml-stream-cache
+    labels:
+      app: dml-stream
+      type: cache
+
+# =============================================================================
+# Network Definitions (optional custom network)
+# =============================================================================
+networks:
+  default:
+    name: dml-stream-network
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

@@ -1,0 +1,91 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+*.egg-info/
+*.egg
+.installed.cfg
+*.egg-link
+.venv/
+venv/
+env/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
+# Documentation
+docs/_build/
+docs/.doctrees/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Data files
+*.json
+!pyproject.toml
+!requirements.txt
+
+# Logs
+*.log
+app.log.json
+logs/
+
+# Downloads
+downloads/
+*.mp4
+*.mp3
+*.mkv
+*.avi
+*.m4a
+*.flac
+*.wav
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker
+.dockerignore
+
+# Scripts
+scripts/*.sh
+!scripts/setup.sh
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp

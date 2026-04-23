@@ -1,0 +1,38 @@
+# CODEOWNERS for DML Stream
+# Auto-assign reviewers for paths
+
+# Default owners for everything
+* @devmayank-official
+
+# Core package ownership
+src/dml_stream/ @devmayank-official
+
+# CLI module
+src/dml_stream/cli/ @devmayank-official
+
+# Core business logic
+src/dml_stream/core/ @devmayank-official
+
+# Storage and database
+src/dml_stream/storage/ @devmayank-official
+
+# Models and dataclasses
+src/dml_stream/models/ @devmayank-official
+
+# Configuration
+src/dml_stream/config/ @devmayank-official
+
+# Tests
+tests/ @devmayank-official
+
+# Documentation
+docs/ @devmayank-official
+
+# CI/CD workflows
+.github/workflows/ @devmayank-official
+
+# Docker configuration
+docker/ @devmayank-official
+
+# Pyproject and build configuration
+pyproject.toml @devmayank-official
