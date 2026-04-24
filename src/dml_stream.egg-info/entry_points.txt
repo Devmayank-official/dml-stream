@@ -1,3 +1,0 @@
-[console_scripts]
-dml-stream = dml_stream.cli.app:main
-dmls = dml_stream.cli.app:main

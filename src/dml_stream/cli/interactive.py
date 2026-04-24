@@ -44,8 +44,8 @@ class InteractiveApp:
         from dml_stream import __version__
 
         header = Panel.fit(
-            f"[bold blue]YouTube Downloader[/bold blue] v{__version__}\n"
-            f"[dim]Enterprise-Level Terminal-Based Video Download Solution[/dim]",
+            f"[bold blue]DML Stream[/bold blue] v{__version__}\n"
+            f"[dim]A Scalable, Module-Driven Media Acquisition Framework[/dim]",
             border_style="blue",
             padding=(1, 2)
         )
