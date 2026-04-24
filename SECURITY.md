@@ -79,7 +79,7 @@ We perform regular security scans:
 
 ## Security Updates
 
-Security updates are released as patch versions (e.g., 2.5.1, 2.5.2) and are announced via:
+Security updates are released as patch versions (e.g.2.5.2, 2.5.3) and are announced via:
 
 - GitHub Releases
 - PyPI changelog
